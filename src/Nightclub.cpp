@@ -19,19 +19,47 @@ const int NUMB_THREADS =20;
 const int MAX_PEOPLE =2;
 std::vector<thread> thds;
 
+Semaphore s_cnt(MAX_PEOPLE);
+//Semaphore s_binary(0);
+//int insideCount = 0;
+//int done = false;
+mutex m;
+
 void log(string s){
+	lock_guard<mutex> lck(m);
 	cout<<s<<endl;
 }
 
 void inside(int id){
+
+	//s_cnt.wait();
+	lock_guard<mutex> lck(m);
+
 	//bask in noisy ambiance
 	log(string("Thread "+to_string(id)+" is inside"));
 	std::this_thread::sleep_for (std::chrono::seconds(1));
+
+	//s_cnt.signal();
 }
 
 void nc(int id){
+	//log(string("Thread "+to_string(id)+" waiting to get in"));
+	//s_cnt.wait();
+		//{
+			//lock_guard<mutex> lck(m);
+			//insideCount++;
+			//inside(id);
+	//}
+	//s_binary.signal();
+	//log(string("Thread "+to_string(id)+" has left"));
+
 	log(string("Thread "+to_string(id)+" waiting to get in"));
+
+	//lock_guard<mutex> lck(m);
+	s_cnt.wait();
 	inside(id);
+	s_cnt.signal();
+
 	log(string("Thread "+to_string(id)+" has left"));
 }
 

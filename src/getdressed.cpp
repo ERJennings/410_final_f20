@@ -18,17 +18,40 @@ using namespace std;
 bool socks_are_on =false;
 bool shoes_are_on =false;
 bool coat_is_on =false;
+condition_variable cv;
+mutex m;
 
 void putonsocks(){
+	unique_lock<mutex> lck(m);
+	socks_are_on = true;
+
 	cout<<"socks on"<<endl;
+
+	cv.notify_all();
 }
 
 void putonshoes(){
+	unique_lock<mutex> lck(m);
+	while(!socks_are_on) {
+		cv.wait(lck);
+	}
+	shoes_are_on = true;
+
 	cout<<"shoes on"<<endl;
+
+	cv.notify_all();
 }
 
 void putoncoat(){
+	unique_lock<mutex> lck(m);
+	while(!shoes_are_on) {
+		cv.wait(lck);
+	}
+	coat_is_on = true;
+
 	cout<<"coat on"<<endl;
+
+	cv.notify_all();
 }
 
 //PLEASE DO NOT CHANGE THIS FUNCTION
